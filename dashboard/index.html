@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <div class="brand"><span class="radar-dot" aria-hidden="true"></span><span class="brand-name">Token Radar</span><span class="brand-tag">launch radar · model radar-2</span></div>
+    <div class="top-meta" id="top-meta"></div>
+  </div>
+</header>
+<main class="wrap" id="app" aria-busy="true">
+  <section class="lede">
+    <div>
+      <h1 id="headline">Watchlist protocols, ranked by implied value</h1>
+      <p class="lede-p" id="lede-p"></p>
+    </div>
+    <div class="facts" id="facts"></div>
+  </section>
+
+  <section class="panel" id="top10-panel">
+    <h2>Top 10 by implied value</h2>
+    <div class="top10" id="top10"></div>
+  </section>
+
+  <section class="controls panel" id="controls">
+    <div class="field"><label for="q">Search</label><input type="search" id="q" placeholder="Name, category or chain" autocomplete="off"></div>
+    <div class="field"><label for="category">Category</label><select id="category"></select></div>
+    <div class="field"><label for="chain">Chain</label><select id="chain"></select></div>
+    <div class="field"><span class="label">Token status</span><div class="tabs" role="tablist">
+      <button type="button" id="tab-pre" role="tab" aria-selected="true">Pre-token</button>
+      <button type="button" id="tab-live" role="tab" aria-selected="false">Live token</button>
+    </div></div>
+    <span class="count" id="count"></span>
+  </section>
+
+  <section class="panel" id="board-panel">
+    <div class="table-wrap">
+      <table id="board-table">
+        <caption class="sub">Pre-token protocols, strongest implied value first. Select a row for its model breakdown and farm plan.</caption>
+        <thead><tr>
+          <th scope="col"><button type="button" data-sort="implied">Rank</button></th>
+          <th scope="col"><button type="button" data-sort="name">Protocol</button></th>
+          <th scope="col"><button type="button" data-sort="tvl">TVL</button></th>
+          <th scope="col"><button type="button" data-sort="growth">7d</button></th>
+          <th scope="col"><button type="button" data-sort="age">Age</button></th>
+          <th scope="col"><button type="button" data-sort="chains">Chains</button></th>
+          <th scope="col"><button type="button" data-sort="implied">Implied value</button></th>
+          <th scope="col">Token</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="empty" hidden>
+      <h2>No protocol matches that filter</h2>
+      <p>Clear the search or pick another category to see the board again.</p>
+      <button class="button primary" type="button" id="clear-filters">Clear filters</button>
+    </div>
+  </section>
+
+  <section class="panel" id="live-panel" hidden>
+    <div class="table-wrap">
+      <table>
+        <caption class="sub">Token live: these protocols already trade, so their market cap is a fact, not a model. They are set aside from the pre-token ranking.</caption>
+        <thead><tr><th scope="col">Status</th><th scope="col">Protocol</th><th scope="col">TVL</th><th scope="col">7d</th><th scope="col">Market cap</th><th scope="col">Token</th></tr></thead>
+        <tbody id="live-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel model" id="model-panel">
+    <h2>How implied value is computed <span class="sandbox-badge" id="sandbox-badge" hidden>sandbox active</span></h2>
+    <p class="sub">Every row is scored by one function of the snapshot figures. No protocol name is special-cased, and no row is hand-picked.</p>
+    <p class="formula" id="formula"></p>
+    <div class="sandbox" id="sandbox">
+      <div class="sand-field"><label for="sb-mult">Comparable multiple × <output id="sb-mult-v">1.00</output></label><input type="range" id="sb-mult" min="0.5" max="2" step="0.05" value="1"></div>
+      <div class="sand-field"><label for="sb-up">Growth weight, gains <output id="sb-up-v">0.65</output></label><input type="range" id="sb-up" min="0" max="1.5" step="0.05" value="0.65"></div>
+      <div class="sand-field"><label for="sb-down">Growth weight, losses <output id="sb-down-v">1.00</output></label><input type="range" id="sb-down" min="0" max="1.5" step="0.05" value="1"></div>
+      <div class="sand-field"><label for="sb-age">Maturity strength × <output id="sb-age-v">1.00</output></label><input type="range" id="sb-age" min="0" max="2" step="0.05" value="1"></div>
+      <button class="button" type="button" id="sb-reset">Reset sandbox</button>
+    </div>
+    <p class="sub">Move a slider and the board re-ranks live from the same figures — the model is not a static list. Reset returns to the board as submitted.</p>
+    <h3>Comparable multiples by category</h3>
+    <p class="sub">Median market-cap / TVL of the snapshot's live-token protocols, per category. Categories with fewer than 3 live protocols use the global median instead.</p>
+    <div class="table-wrap"><table class="comps"><thead><tr><th scope="col">Category</th><th scope="col">Live protocols</th><th scope="col">Multiple</th></tr></thead><tbody id="comps-tbody"></tbody></table></div>
+    <p class="sub" id="model-note"></p>
+  </section>
+
+  <section class="panel" id="method-panel">
+    <h2>Reading the radar</h2>
+    <p>The watchlist is the floor, never the ceiling: every protocol with at least $50M of TVL and no token on record, plus 157 more pre-token protocols below that floor. The board ranks only genuine launch candidates, under the same exclusion the watchlist uses: no wrapped, staked or bridged product of a token that already trades, and no exchange product — a bridge for BTC or a staked-ETH receipt has no token to launch.</p>
+    <p>Implied value is a model's estimate of what a token would be worth if the protocol's record stayed as it is. It is not a price, not a prediction of whether or when a token is issued, and not investment advice. The growth term is asymmetric on purpose: a shrinking protocol loses value faster than a growing one gains it, because a launch cannot rescue a shrinking user base. Young protocols are discounted for launch uncertainty; multi-chain protocols earn a small stickiness bonus.</p>
+  </section>
+</main>
+<dialog class="detail" id="detail" aria-labelledby="detail-title"></dialog>
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
